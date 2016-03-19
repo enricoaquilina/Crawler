@@ -24,7 +24,3 @@ class LinkHunter(HTMLParser):
     #implement abstract methods
     def error(self, message):
         pass
-
-
-finder = LinkHunter()
-finder.feed('<html><head><title></title></head></html>')

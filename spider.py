@@ -1,6 +1,13 @@
 from urllib.request import urlopen
+from urllib.request import FancyURLopener
+
 from link_hunter import LinkHunter
 from general import *
+import sys
+
+class MyOpener(FancyURLopener):
+    version = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36'
+
 
 class Spider:
 
@@ -47,11 +54,11 @@ class Spider:
     @staticmethod
     def add_links_to_queue(links):
         for link in links:
-            if link in Spider.queue:
+            if link in Spider.queue_set:
                 continue
-            if link in Spider.crawled:
+            if link in Spider.crawled_set:
                 continue
-            if Spider.domain_name not in link
+            if Spider.domain_name not in link:
                 continue
 
             Spider.queue_set.add(link)
@@ -61,14 +68,19 @@ class Spider:
 
         html_string = ''
         try:
-            response = urlopen(page_url)
-            if response.getheader('Content-Type') == 'text/html':
-                html_bytes = response.read
+            myopener = MyOpener()
+            response = myopener.open(page_url)
+            # response = urlopen(page_url)
+
+            if 'text/html' in response.getheader('Content-Type'):
+                html_bytes = response.read()
                 html_string = html_bytes.decode('utf-8')
             finder = LinkHunter(Spider.base_url, page_url)
             finder.feed(html_string)
         except:
+            e = sys.exc_info()[0]
             print('Error: can\'t crawl page!')
+            print(e)
             return set()
         return finder.page_links()
 
